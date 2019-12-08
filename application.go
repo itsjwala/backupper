@@ -14,7 +14,6 @@ import (
 
 var wg sync.WaitGroup
 
-
 func ensureDir(filename string) {
 
 	dirname := filepath.Dir(filename)
@@ -42,7 +41,7 @@ func readFrom(path string) uint64 {
 
 }
 
-func fetch(path string){
+func fetch(path string) {
 	defer wg.Done()
 	client, err := ftp.Connect("192.168.0.102:9999")
 	log.Println(path)
@@ -54,7 +53,6 @@ func fetch(path string){
 	if err := client.Login("anonymous", "anonymous"); err != nil {
 		log.Fatal(err)
 	}
-
 
 	filesize, _ := client.FileSize(path)
 
@@ -111,10 +109,10 @@ func fetch(path string){
 	}
 }
 
-type MyFile struct{
-	dirname string
+type MyFile struct {
+	dirname  string
 	filename string
-	size uint64
+	size     uint64
 }
 
 const CHANNEL_SIZE int = 100000
@@ -132,110 +130,101 @@ goftp => concurrent
 
 */
 
-func makeFtpClient() (*ftp.ServerConn,error){
+func makeFtpClient() (*ftp.ServerConn, error) {
 
-	client,err := ftp.Connect(ip+":"+port)
+	client, err := ftp.Connect(ip + ":" + port)
 
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
-	if err := client.Login(username,password); err != nil {
-		return nil,err
+	if err := client.Login(username, password); err != nil {
+		return nil, err
 	}
 
-	return client,nil
+	return client, nil
 }
 
-func fetchFilesFromDirectoryRecurSively(client * ftp.ServerConn,dir string,include_dir map[string]bool,exclude_dir map[string]bool,mychan chan MyFile)(error){
+func fetchFilesFromDirectoryRecurSively(client *ftp.ServerConn, dir string, include_dir map[string]bool, exclude_dir map[string]bool, mychan chan MyFile) error {
 	include_dir[dir] = true
 
+	entries, err := client.List(dir)
 
-	entries,err := client.List(dir)
-
-	if(err !=nil){
+	if err != nil {
 		return err
 	}
 
-	for _,entry := range entries{
+	for _, entry := range entries {
 
+		switch entry.Type {
+		case ftp.EntryTypeFile:
+			newfile := MyFile{dirname: dir, filename: entry.Name, size: entry.Size}
+			// log.Println(newfile)
 
-		switch entry.Type{
-			case ftp.EntryTypeFile :
-				newfile := MyFile{dirname:dir,filename:entry.Name,size:entry.Size}
-				// log.Println(newfile)
+			mychan <- newfile
 
-				mychan <- newfile
+		case ftp.EntryTypeFolder:
 
-			case ftp.EntryTypeFolder :
+			var folderName string
 
-				var folderName string
+			folderName = dir + entry.Name + "/"
 
-				folderName = dir+entry.Name+"/"
+			if _, excluded := exclude_dir[folderName]; !excluded {
+				if _, included := include_dir[folderName]; !included {
 
-				if _, excluded := exclude_dir[folderName] ; !excluded{
-						if _,included := include_dir[folderName] ; !included{
-
-						fetchFilesFromDirectoryRecurSively(client,folderName,include_dir,exclude_dir,mychan)
-					}
+					fetchFilesFromDirectoryRecurSively(client, folderName, include_dir, exclude_dir, mychan)
 				}
+			}
 
-			case ftp.EntryTypeLink : //Skip
+		case ftp.EntryTypeLink: //Skip
 		}
 	}
 	return nil
 }
 
-func massageDirnameWithSlash(dir string)string{
+func massageDirnameWithSlash(dir string) string {
 	length := len(dir)
-	if(length == 0){
+	if length == 0 {
 		return "/"
 	}
 
-	if(length>0 && dir[0] == '/' && dir[length-1] == '/'){
+	if length > 0 && dir[0] == '/' && dir[length-1] == '/' {
 		return dir
-	}else if(dir[0]=='/'){
-		return dir+"/"
-	}else if(dir[length-1] =='/'){
-		return "/"+dir
-	}else{
-		return "/"+dir+"/"
+	} else if dir[0] == '/' {
+		return dir + "/"
+	} else if dir[length-1] == '/' {
+		return "/" + dir
+	} else {
+		return "/" + dir + "/"
 	}
 
 }
-func fetchFiles(client* ftp.ServerConn,include []string,exclude []string) (chan MyFile) {
-	file_channel := make(chan MyFile,CHANNEL_SIZE)
-
+func fetchFiles(client *ftp.ServerConn, include []string, exclude []string) chan MyFile {
+	file_channel := make(chan MyFile, CHANNEL_SIZE)
 
 	exclude_dir := make(map[string]bool)
 
-
-	for _,dir := range exclude{
+	for _, dir := range exclude {
 		exclude_dir[massageDirnameWithSlash(dir)] = true
 	}
 
-
 	include_dir := make(map[string]bool)
 
-
-	for _,dir := range include{
-
+	for _, dir := range include {
 
 		dir = massageDirnameWithSlash(dir)
 
-		fetchFilesFromDirectoryRecurSively(client,dir,include_dir,exclude_dir,file_channel)
+		fetchFilesFromDirectoryRecurSively(client, dir, include_dir, exclude_dir, file_channel)
 		log.Println(include_dir)
 
 	}
 
 	close(file_channel)
 
-
 	return file_channel
 }
 
 func main() {
-
 
 	// path := "zzz"
 	// path := "Download/lec1.mp4"
@@ -249,11 +238,10 @@ func main() {
 	// log.Println("Waiting for them to die")
 	// wg.Wait()
 
-
-	if client,err := makeFtpClient() ; err==nil {
+	if client, err := makeFtpClient(); err == nil {
 
 		// fetchFiles(client,[]string{"","/Download"},[]string{"/Download"})
-		for fileToRead := range fetchFiles(client,[]string{"Music/AudioBooks","/Music"},[]string{"/Music/NewPipe/"}){
+		for fileToRead := range fetchFiles(client, []string{"Music/AudioBooks", "/Music"}, []string{"/Music/NewPipe/"}) {
 			log.Println(fileToRead)
 		}
 
@@ -265,7 +253,7 @@ func main() {
 
 		client.Quit()
 		// client.NoOp()
-	}else{
+	} else {
 		log.Fatal(err)
 	}
 
