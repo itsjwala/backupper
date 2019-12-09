@@ -5,6 +5,7 @@
 <p>Take phone's media backup to desktop</p>
 </div>
 
+
 [![HitCount](http://hits.dwyl.io/jigarWala/backupper.svg)](http://hits.dwyl.io/jigarWala/backupper)
 
 
@@ -59,17 +60,17 @@ $ ./backupper path/to/configuration-file
 
 ### Checklist
 
-[*] Can Resume Download from where it stopped?
+- [X] Can Resume Download from where it stopped?
 
-[] Configurable Backups via properties file
+- [ ] Configurable Backups via properties file
 
-[] Error handling
+- [ ] Error handling
 
-[] Logging
+- [ ] Logging
 
-[] Concurrent Downloads
+- [ ] Concurrent Downloads
 
-> github.com/jlaffaye/ftp  isn't concurrent and github.com/secsy/goftp is concurrent but don't support resuming capabilities
+github.com/jlaffaye/ftp  isn't concurrent and github.com/secsy/goftp is concurrent but don't support resuming capabilities
 
 
 
