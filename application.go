@@ -1,18 +1,26 @@
 package main
 
-// import "service"
-
 import (
 	"github.com/jlaffaye/ftp"
-	// "time"
 	"log"
-	// "io"
+	"io"
 	"os"
 	"path/filepath"
-	"sync"
 )
 
-var wg sync.WaitGroup
+type MyFile struct {
+	dirname  string
+	filename string
+	size     uint64
+}
+
+const CHANNEL_SIZE int = 100000
+const CONCURRENCY int = 1
+
+const ip string = "192.168.0.102"
+const port string = "9999"
+const username string = "anonymous"
+const password string = "anonymous"
 
 func ensureDir(filename string) {
 
@@ -35,41 +43,38 @@ func readFrom(path string) uint64 {
 
 	filesize := fileinfo.Size()
 
-	log.Printf("Already Have %d bytes", filesize)
-
 	return uint64(filesize)
 
 }
 
-func fetch(path string) {
-	defer wg.Done()
-	client, err := ftp.Connect("192.168.0.102:9999")
-	log.Println(path)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+func download(client *ftp.ServerConn,file MyFile) {
 
-	if err := client.Login("anonymous", "anonymous"); err != nil {
-		log.Fatal(err)
-	}
+	path := "."+file.dirname+file.filename
+	log.Printf("Downloading file %s",path)
 
-	filesize, _ := client.FileSize(path)
-
-	log.Printf("Stat from upstream : %d", filesize)
-	// os.Stat
+	filesize := file.size
 	startFrom := readFrom(path)
+
+	if startFrom == 0 {
+		log.Printf("Fetching : %d bytes", filesize-startFrom)
+	}else if startFrom < filesize{
+		log.Printf("Fetching remaining : %d bytes", filesize-startFrom)
+	}else{
+		log.Printf("File already downloaded skipping..")
+		return
+	}
+
 
 	if resp, err := client.RetrFrom(path, startFrom); err != nil {
 		log.Fatal(err)
 	} else {
-
+		defer resp.Close()
 		ensureDir(path)
 
 		var flags int
 
 		if startFrom == 0 {
-			// := os.Create(path)
 			flags = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 		} else {
 			flags = os.O_APPEND | os.O_WRONLY
@@ -81,47 +86,11 @@ func fetch(path string) {
 		}
 		defer newFile.Close()
 
-		data := make([]byte, 1024000)
-
-		// io.Copy(newFile,resp)
-
-		for {
-
-			n, err := resp.Read(data)
-
-			if err != nil {
-				if n == 0 {
-					log.Println("Read complete")
-				}
-				break
-			}
-
-			newFile.Write(data[:n])
-
-		}
-
+		io.Copy(newFile,resp)
 	}
 
-	// log.Println(filesize)
-
-	if err := client.Quit(); err != nil {
-		log.Fatal(err)
-	}
 }
 
-type MyFile struct {
-	dirname  string
-	filename string
-	size     uint64
-}
-
-const CHANNEL_SIZE int = 100000
-const CONCURRENCY int = 1
-
-const ip string = "192.168.0.102"
-const port string = "9999"
-const username string = "anonymous"
-const password string = "anonymous"
 
 /*
 
@@ -159,7 +128,6 @@ func fetchFilesFromDirectoryRecurSively(client *ftp.ServerConn, dir string, incl
 		switch entry.Type {
 		case ftp.EntryTypeFile:
 			newfile := MyFile{dirname: dir, filename: entry.Name, size: entry.Size}
-			// log.Println(newfile)
 
 			mychan <- newfile
 
@@ -215,8 +183,6 @@ func fetchFiles(client *ftp.ServerConn, include []string, exclude []string) chan
 		dir = massageDirnameWithSlash(dir)
 
 		fetchFilesFromDirectoryRecurSively(client, dir, include_dir, exclude_dir, file_channel)
-		log.Println(include_dir)
-
 	}
 
 	close(file_channel)
@@ -226,33 +192,15 @@ func fetchFiles(client *ftp.ServerConn, include []string, exclude []string) chan
 
 func main() {
 
-	// path := "zzz"
-	// path := "Download/lec1.mp4"
-	// path := "Download/default.xlsx"
-	// wg.Add(1)
-	// go fetch(path)
-	// path := "Download/linuxmint-19.2-xfce-32bit.iso"
-	// wg.Add(1)
-	// go fetch(path)
-
-	// log.Println("Waiting for them to die")
-	// wg.Wait()
-
 	if client, err := makeFtpClient(); err == nil {
 
-		// fetchFiles(client,[]string{"","/Download"},[]string{"/Download"})
-		for fileToRead := range fetchFiles(client, []string{"Music/AudioBooks", "/Music"}, []string{"/Music/NewPipe/"}) {
-			log.Println(fileToRead)
+		mychan := fetchFiles(client, []string{"Pictures/Screenshots"}, []string{"/Music/NewPipe/"})
+
+		for fileToRead := range  mychan{
+
+				download(client,fileToRead)
 		}
-
-		// entries,_ := client.List("Music/")
-
-		// for _,entry := range entries{
-		// 	log.Println(entry)
-		// }
-
 		client.Quit()
-		// client.NoOp()
 	} else {
 		log.Fatal(err)
 	}
