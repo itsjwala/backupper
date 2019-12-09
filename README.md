@@ -10,7 +10,7 @@
 
 -------------------------------------------------
 
-It works by having ftp server on the phone(es file explorer, solid explorer..)
+It works by having ftp server on the phone(es file explorer, solid explorer..) and setting up requied configuration to start the backup. It is 
 
 -------------------------------------------
 
@@ -38,13 +38,17 @@ $ go get github.com/jigarWala/backupper
 
 * Start FTP server on your phone
 
-<img align="center" src="https://imgur.com/YG8PQeI"/>
+
+<img align="center" height="15%" width="35%" src="https://i.imgur.com/YG8PQeI.png"/>
 
 
-* prepare config file, grab key from below
+* prepare below properties file for your usecase,
 
 ```txt
-
+username=anonymous (required)
+password=anonymous (required)
+server=192.168.0.102 (required)
+port=9999 (required)
 ```
 
 * Execute the command
@@ -56,9 +60,13 @@ $ ./backupper path/to/configuration-file
 ### Checklist
 
 [*] Can Resume Download from where it stopped?
+
 [] Configurable Backups via properties file
+
 [] Error handling
+
 [] Logging
+
 [] Concurrent Downloads
 
 > github.com/jlaffaye/ftp  isn't concurrent and github.com/secsy/goftp is concurrent but don't support resuming capabilities
@@ -68,7 +76,7 @@ $ ./backupper path/to/configuration-file
 ### Why I made this?
 
 
-I wanted to backup my screenshots, camera roll, music, whatsapp media etc to my local machine. There are cloud backups available like google drive. But it's quite slow for me as my internet speed is not so fast.
+I wanted to backup my screenshots, camera roll, music, whatsapp media etc to my local machine. There are cloud backups available like google drive. But it's quite slow for me as my internet speed is not so fast. Also I wanted to learn golang :)
 
 
 It is very fast and accessible for me and maybe others can also find it useful.
