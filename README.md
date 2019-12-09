@@ -33,7 +33,7 @@ It works by having ftp server on the phone(es file explorer, solid explorer..) a
 $ go get github.com/jigarWala/backupper
 ```
 
-*
+* TODO
 
 ### Usage
 
@@ -58,6 +58,7 @@ port=9999 (required)
 $ ./backupper path/to/configuration-file
 ```
 
+
 ### Checklist
 
 - [X] Can Resume Download from where it stopped?
@@ -70,7 +71,8 @@ $ ./backupper path/to/configuration-file
 
 - [ ] Concurrent Downloads
 
-github.com/jlaffaye/ftp  isn't concurrent and github.com/secsy/goftp is concurrent but don't support resuming capabilities
+
+*github.com/jlaffaye/ftp*  isn't concurrent and *github.com/secsy/goftp* is concurrent but don't support resuming capabilities
 
 
 
@@ -82,18 +84,18 @@ I wanted to backup my screenshots, camera roll, music, whatsapp media etc to my 
 
 It is very fast and accessible for me and maybe others can also find it useful.
 
-## Contributing
+### Contributing
 
 Please reach out to me if you wish to contribute to this project.
 
 
-## Authors
+### Authors
 
 * **Jigar Wala**  - [jigarWala](https://github.com/jigarWala)
 
 See also the list of [contributors](https://github.com/jigarWala/backupper/contributors) who participated in this project.
 
-## License
+### License
 
 This project is licensed under the MIT - see the [LICENSE](./LICENSE) file for details
 
