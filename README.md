@@ -79,7 +79,7 @@ $ ./backupper path/to/configuration-file
 ### Why I made this?
 
 
-I wanted to backup my screenshots, camera roll, music, whatsapp media etc to my local machine. There are cloud backups available like google drive. But it's quite slow for me as my internet speed is not so fast. Also I wanted to learn golang :)
+I wanted to backup my screenshots, camera roll, music, whatsapp media etc to my local machine. Ofcourse there are adb configurable scripts available, But I wanted it to be wireless And There are cloud backups available too like google drive. But it is quite slow for me as my internet speed is not so fast Also I wanted to learn Golang :)
 
 
 It is very fast and accessible for me and maybe others can also find it useful.
