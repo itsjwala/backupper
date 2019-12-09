@@ -2,7 +2,7 @@
 
 <div align="center">
 <h2>Backupper</h2>
-<p>Take phone's media backup to desktop</p>
+<p>Command line tool to take phone's media backup to desktop wirelessly</p>
 </div>
 
 
@@ -11,7 +11,7 @@
 
 -------------------------------------------------
 
-It works by having ftp server on the phone(es file explorer, solid explorer..) and setting up requied configuration to start the backup. It is 
+It works by having ftp server on the phone(es file explorer, solid explorer..) and setting up required configuration to start the backup. It has resuming download capabilities, It is fast and configurable.
 
 -------------------------------------------
 
@@ -19,11 +19,11 @@ It works by having ftp server on the phone(es file explorer, solid explorer..) a
 
 ### Features
 
-* Blazing Fast :rocket:
+* Quite Fast :rocket:
 
-* Resumable Download
+* Resumable Download :inbox_tray:
 
-* Highly Configurable
+* Highly Configurable :wrench:
 
 ### Build from source
 
@@ -71,8 +71,6 @@ $ ./backupper path/to/configuration-file
 
 - [ ] Concurrent Downloads
 
-
-*github.com/jlaffaye/ftp*  isn't concurrent and *github.com/secsy/goftp* is concurrent but don't support resuming capabilities
 
 
 
