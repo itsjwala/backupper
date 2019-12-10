@@ -51,7 +51,7 @@ $ go build $GOPATH/src/github.com/jigarWala/backupper
 
 
 
-<img align="center" height="20%" width="35%" src="https://i.imgur.com/YG8PQeI.png"/>
+<img align="center" height="20%" width="35%" src="https://i.imgur.com/BEUGNeW.png"/>
 
 
 * prepare configuration file for your usecase
