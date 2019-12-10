@@ -2,10 +2,11 @@ package main
 
 import (
 	"github.com/jlaffaye/ftp"
-	"log"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type MyFile struct {
@@ -14,13 +15,10 @@ type MyFile struct {
 	size     uint64
 }
 
-const CHANNEL_SIZE int = 100000
-const CONCURRENCY int = 1
-
-const ip string = "192.168.0.102"
-const port string = "9999"
-const username string = "anonymous"
-const password string = "anonymous"
+const (
+	CHANNEL_SIZE int           = 100000
+	TIME_OUT     time.Duration = 10 * time.Second
+)
 
 func ensureDir(filename string) {
 
@@ -47,29 +45,31 @@ func readFrom(path string) uint64 {
 
 }
 
+func download(client *ftp.ServerConn, file MyFile) {
 
-func download(client *ftp.ServerConn,file MyFile) {
+	server_path := file.dirname + file.filename
 
-	path := "."+file.dirname+file.filename
-	log.Printf("Downloading file %s",path)
+	path := filepath.Join(config.Base_dir, server_path)
+
+	log.Printf("Downloading into %s", path)
 
 	filesize := file.size
 	startFrom := readFrom(path)
 
 	if startFrom == 0 {
 		log.Printf("Fetching : %d bytes", filesize-startFrom)
-	}else if startFrom < filesize{
+	} else if startFrom < filesize {
 		log.Printf("Fetching remaining : %d bytes", filesize-startFrom)
-	}else{
+	} else {
 		log.Printf("File already downloaded skipping..")
 		return
 	}
 
-
-	if resp, err := client.RetrFrom(path, startFrom); err != nil {
+	if resp, err := client.RetrFrom(server_path, startFrom); err != nil {
 		log.Fatal(err)
 	} else {
 		defer resp.Close()
+
 		ensureDir(path)
 
 		var flags int
@@ -86,11 +86,10 @@ func download(client *ftp.ServerConn,file MyFile) {
 		}
 		defer newFile.Close()
 
-		io.Copy(newFile,resp)
+		io.Copy(newFile, resp)
 	}
 
 }
-
 
 /*
 
@@ -101,13 +100,13 @@ goftp => concurrent
 
 func makeFtpClient() (*ftp.ServerConn, error) {
 
-	client, err := ftp.Connect(ip + ":" + port)
+	client, err := ftp.DialTimeout(config.Server+":"+config.Port, TIME_OUT)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err := client.Login(username, password); err != nil {
+	if err := client.Login(config.Username, config.Password); err != nil {
 		return nil, err
 	}
 
@@ -190,19 +189,57 @@ func fetchFiles(client *ftp.ServerConn, include []string, exclude []string) chan
 	return file_channel
 }
 
-func main() {
+func start() {
 
 	if client, err := makeFtpClient(); err == nil {
 
-		mychan := fetchFiles(client, []string{"Pictures/Screenshots"}, []string{"/Music/NewPipe/"})
+		mychan := fetchFiles(client, config.Include_dir, config.Exclude_dir)
 
-		for fileToRead := range  mychan{
-
-				download(client,fileToRead)
+		for fileToRead := range mychan {
+			download(client, fileToRead)
 		}
 		client.Quit()
 	} else {
 		log.Fatal(err)
 	}
+
+}
+
+const sample_json_config string = `
+{
+"server":"192.168.0.102",
+"port":"9999",
+"username":"anonymous",
+"password":"anonymous",
+"include_dir":["/Download","Music"],
+"exclude_dir":["/Music/NewPipe"],
+"base_dir":"/home/jigar/backups"
+}
+`
+
+func help() {
+
+	log.Fatal("Please provide configuration file, sample config json is given below..", sample_json_config, "For more info visit :- github.com/jigarWala/backupper")
+}
+
+func greet() {
+	log.Println("Backupper is running with following config..")
+	log.Printf("server=%s", config.Server)
+	log.Printf("port=%s", config.Port)
+	log.Printf("username=%s", config.Username)
+	log.Printf("password=%s", config.Password)
+	log.Printf("include_dir=%s", config.Include_dir)
+	log.Printf("exclude_dir=%s", config.Exclude_dir)
+	log.Printf("base_dir=%s", config.Base_dir)
+}
+func main() {
+
+	if len(os.Args) == 1 {
+		help()
+	}
+
+	loadConfig(os.Args[1])
+	greet()
+	start()
 
 }

@@ -1,0 +1,7 @@
+{
+"server":"192.168.0.102",
+"port":"9999",
+"include_dir":["Download","DCIM/Camera","Music","Movies","WhatsApp"],
+"exclude_dir":["/Music/NewPipe","WhatsApp/Databases"],
+"base_dir": "/home/jigar/Desktop/backups"
+}
