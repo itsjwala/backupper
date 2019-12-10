@@ -43,13 +43,30 @@ $ go get github.com/jigarWala/backupper
 <img align="center" height="15%" width="35%" src="https://i.imgur.com/YG8PQeI.png"/>
 
 
-* prepare below properties file for your usecase,
+* prepare configuration file for your usecase
 
-```txt
-username=anonymous (required)
-password=anonymous (required)
-server=192.168.0.102 (required)
-port=9999 (required)
+
+Key|Required|Default | Comments
+---|---|---| ----
+server|yes|NA | compulsory key
+port|yes|NA | compulsory key
+username | no | anonymous | `"anonymous"` is used for no username
+password| no | anonymous | `"anonymous"` is used for no password
+include_dir | no | [ "/" ] | `/` or the whole server directory is considered 
+exclude_dir | no | [ ] | no directory is excluded
+base_dir | no | check comments => | backup is created in the directory where executable `resides`
+
+
+sample json config file
+
+```json
+{
+"server":"192.168.0.102",
+"port":"9999",
+"include_dir":["Download","DCIM/Camera","Music","Movies","WhatsApp"],
+"exclude_dir":["/Music/NewPipe","WhatsApp/Databases"],
+"base_dir": "/home/jigar/Desktop/backups"
+}
 ```
 
 * Execute the command
