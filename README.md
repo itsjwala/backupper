@@ -25,13 +25,16 @@ It works by having ftp server on the phone(es file explorer, solid explorer..) a
 
 * Quite Fast :rocket:
 
-* Resumable Download :inbox_tray:
+* Resumable & Incremental Download :inbox_tray:
 
 * Very Configurable :wrench:
+### Download 
+
+* Please download platform specific binaries from [here](https://github.com/jigarWala/backupper/releases).
 
 ### Build from source
 
-* Make sure you have [go](https://golang.org/dl/) installed and have in your path
+* Make sure you have [Go](https://golang.org/dl/) installed and have in your path
 
 * fetch this repository
 
@@ -39,10 +42,10 @@ It works by having ftp server on the phone(es file explorer, solid explorer..) a
 $ go get github.com/jigarWala/backupper
 ```
 
-* make executable
+* binary available in
 
 ```bash
-$ go build $GOPATH/src/github.com/jigarWala/backupper
+$ $HOME/go/bin/backupper
 ```
 
 ### Usage
