@@ -1,5 +1,3 @@
-> This project is still work in progress!
-
 <div align="center">
 <h2>Backupper</h2> 
 <p>Command line tool to take phone's media backup to desktop wirelessly</p>
